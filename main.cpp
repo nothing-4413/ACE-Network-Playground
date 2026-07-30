@@ -1,5 +1,6 @@
 #include "AcceptorHandler.h"
 #include "ClientManager.h"
+#include "WorkerTask.h"
 
 #include <ace/Event_Handler.h>
 #include <ace/Reactor.h>
@@ -10,8 +11,17 @@ int main()
 {
 
     const unsigned short port = 9000;
+
     ClientManger manager;
-    AcceptorHandler acceptor_handler(port,manager);
+    WorkerTask worker(manage)
+
+    if(worker.open()==-1)
+    {
+        std::cerr<<"start worker failed"<<std::endl;
+        return 1;
+    }
+
+    AcceptorHandler acceptor_handler(port,manager,worker);
 
     if(acceptor_handler.open()==-1)
     {
@@ -27,6 +37,8 @@ int main()
     std::cout <<"reactor event loop started"<<std::endl;
 
     ACE_Reactor::instance()->run_reactor_event_loop();
+
+    worker.stop();
 
     return 0;
 }

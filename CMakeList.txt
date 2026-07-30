@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(module_05_broadcast_chat LANGUAGES CXX)
+project(module_06_task_worker LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -9,6 +9,7 @@ add_executable(server
     AcceptorHandler.cpp
     ClientHandler.cpp
     ClientManager.cpp
+    WorkerTask.cpp
 )
 
 add_executable(client

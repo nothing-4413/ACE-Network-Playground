@@ -4,12 +4,15 @@
 #include <ace/Event_Handler.h>
 #include <ace/SOCK_Stream.h>
 
+#include<string>
+
 class ClientManager;
+class WorkerTask;
 
 class ClientHandler : public ACE_Event_Handler
 {
 public:
-    ClientHandler(ACE_SOCK_Stream stream,ClientManager& manager,int id);
+    ClientHandler(ACE_SOCK_Stream stream,ClientManager& manager,WorkerTask& worker,int id);
 
 
     // Reactor 通过 get_handle() 获取这个 handler 关心的 socket。
@@ -28,6 +31,7 @@ public:
 private:
     ACE_SOCK_Stream stream_;
     ClientManager& manager_;
+    WorkerTask& worker_;
     int id_;
 };
 

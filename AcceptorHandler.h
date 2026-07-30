@@ -6,11 +6,12 @@
 #include <ace/SOCK_Acceptor.h>
 
 class ClientManager;
+class WorkerTask;
 
 class AcceptorHandler : public ACE_Event_Handler
 {
 public:
-    AcceptorHandler(unsigned short port,ClientManager& manager);
+    AcceptorHandler(unsigned short port,ClientManager& manager,WorkerTask& worker);
 
     int open();
 
@@ -27,6 +28,7 @@ private:
     ACE_INET_Addr listen_addr_;
     ACE_SOCK_Acceptor acceptor_;
     ClientManager manager_;
+    WorkerTask& worker_;
     int next_client_id_;
 };
 

@@ -1,5 +1,6 @@
 #include "ClientHandler.h"
 #include "ClientManager.h"
+#include "WorkerTask.h"
 
 #include <ace/OS_NS_string.h>
 
@@ -11,7 +12,7 @@ namespace
     const int BUFFER_SIZE = 4096:
 }
 
-ClientHandler::ClientHandler(ACE_SOCK_Stream stream,ClientManager& manager,int id):stream_(stream),manager_(manager),id_(id){}
+ClientHandler::ClientHandler(ACE_SOCK_Stream stream,ClientManager& manager,WorkerTask& worker,int id):stream_(stream),manager_(manager),worker_(worker),id_(id){}
 
 ACE_HANDLE ClientHandler::get_handle()const
 {
@@ -41,12 +42,9 @@ int ClientHandler::handle_input(ACE_HANDLE handle)
 
         std::cout << "client #" << id_ << " says: " << buffer << std::endl;
         
-        std::ostringstream out;
-        out<<"client #"<<id_<<:<<text;
+        worker_.enqueue_chat_message(id_,text);
 
-        manager_.broadcast(this,out.str());
-
-        send_message("[server] message delivered\n");
+        send_message("[server] message queued\n");
 
         return 0;
     }
@@ -64,13 +62,13 @@ int ClientHandler::handle_input(ACE_HANDLE handle)
 int ClientHandler::handle_close(ACE_HANDLE handle,ACE_Reactor_Mask close_mask)
 {
     std::cout<<"closing client #"<<id_<<std::endl;
-
-    std::ostringstream out;
-    out<<"[server] client #"<<id_<<"left,online clients:"<<message_.count()-1<<"\n";
-
+    
     manager_.remove(this);
     
-    manager_.broadcast(this,out.str());
+    std::ostringstream out;
+    out<<"[server] client #"<<id_<<"left,online clients:"<<message_.count()-1<<"\n";
+    
+    manager_.broadcast(id_,out.str());
     
     stream_.close()
 
