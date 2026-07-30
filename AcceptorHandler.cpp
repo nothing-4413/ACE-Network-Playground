@@ -1,11 +1,12 @@
 #include "AcceptorHandler.h"
 #include "ClientHandler.h"
+#include "ClientManager.h"
 
 #include <ace/Reactor.h>
 
 #include <iostream>
 
-AcceptorHandler::AcceptorHandler(unsigned short port):port(port),listen_addr_(port){}
+AcceptorHandler::AcceptorHandler(unsigned short port,ClientManager& manager):port(port),listen_addr_(port),manager_(manager),next_client_id_(1){}
 
 int AcceptorHandler::open()
 {
@@ -24,7 +25,7 @@ ACE_HANDLE AcceptorHandler::get_line()const
     return acceptor_.getline();
 }
 
-int AcceptorHandler::handle_input(ACE_HANDLE fd)
+int AcceptorHandler::handle_input(ACE_HANDLE handle)
 {
     ACE_SOCK_Stream client_stream;
     ACE_INET_Addr client_addr;
@@ -35,19 +36,26 @@ int AcceptorHandler::handle_input(ACE_HANDLE fd)
         return 0;
     }
 
+    const int client_id = next_client_id_++;
+
     char addr_text[256]={0};
     client_addr.addr_to_string(addr_text,sizeof(addr_text));
 
-    std::cout<<"client connected:"<<addr_text<<std::endl;
+    std::cout<<"client #"<<client<<"connected:"<<addr_text<<std::endl;
 
-    ClientHandler* client_handler = new ClientHandler(client_stream);
+    ClientHandler* client_handler = new ClientHandler(client_stream,manager_,client_id);
 
     if(ACE_Reactor::instance()->register_handler(client_handler,ACE_Event_Handler::READ_MASK)==-1)
     {
         std::cerr<<"register client handler failed"<<std::endl;
         client_stream.close();
         delete client_handler;
+        return 0;
     }
+    manager_.add(client_handler);
+
+    std::cout<<"online clients:"<<manager_.cout()<<std::endl;
+    
     return 0;
 }
 

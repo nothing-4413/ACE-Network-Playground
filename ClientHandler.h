@@ -4,14 +4,13 @@
 #include <ace/Event_Handler.h>
 #include <ace/SOCK_Stream.h>
 
-// ClientHandler 代表“一个客户端连接”。
-//
-// 在 ACE Reactor 模型里：
-// 一个 socket 通常对应一个 ACE_Event_Handler。
+class ClientManager;
+
 class ClientHandler : public ACE_Event_Handler
 {
 public:
-    explicit ClientHandler(ACE_SOCK_Stream stream);
+    ClientHandler(ACE_SOCK_Stream stream,ClientManager& manager,int id);
+
 
     // Reactor 通过 get_handle() 获取这个 handler 关心的 socket。
     ACE_HANDLE get_handle() const override;
@@ -22,8 +21,12 @@ public:
     // 当连接关闭、出错、handler 被移除时，Reactor 调用 handle_close()。
     int handle_close(ACE_HANDLE handle, ACE_Reactor_Mask close_mask) override;
 
+    int id() const;
+
 private:
     ACE_SOCK_Stream stream_;
+    ClientManager& manager_;
+    int id_;
 };
 
 #endif

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(module_03_acceptor_handler LANGUAGES CXX)
+project(module_04_connection_manager LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -8,6 +8,7 @@ add_executable(server
     main.cpp
     AcceptorHandler.cpp
     ClientHandler.cpp
+    ClientManager.cpp
 )
 
 add_executable(client

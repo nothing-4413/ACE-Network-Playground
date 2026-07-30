@@ -1,62 +1,32 @@
-#include <ace/INET_Addr.h>
-#include <ace/SOCK_Connector.h>
-#include <ace/SOCK_Stream.h>
-#include <ace/OS_NS_string.h>
+#include "AcceptorHandler.h"
+#include "ClientManager.h"
 
-#include<iostream>
-#include<string>
+#include <ace/Event_Handler.h>
+#include <ace/Reactor.h>
 
+#include <iostream>
 
 int main()
 {
 
     const unsigned short port = 9000;
-    const char* host = "127.0.0.1";
-    const int buffer_size = 4096;
+    ClientManger manager;
+    AcceptorHandler acceptor_handler(port,manager);
 
-    ACE_INET_Addr server_addr(port,host);
-    ACE_SOCK_Connector connector;
-    ACE_SOCK_Stream stream;
-
-    if(connector.connect(stream,server_addr)==-1)
+    if(acceptor_handler.open()==-1)
     {
-        std::cerr<<"connect failed"<<std::endl;
         return 1;
     }
-    std::cout <<"connected to server" <<std::endl;
-    std::cout<<"type text, or type quit to exit"<<std::endl;
 
-    std::string line;
-    char buffer[buffer_size];
-
-    while(std::getline(std::cin,line))
+    if(ACE_Reactor::instance()->register_handler(&acceptor_handler,ACE_Event_Handler::READ_MASK)==-1)
     {
-        if(line == "quit")
-        {
-            break;
-        }
-
-        line+="\n";
-
-        if(stream.send_n(line.data(),line.size())!=static_cast<ssize_t>(line.size()))
-        {
-            std::cerr<<"send failed"<<std::endl;
-            break;
-        }
-
-        ACE_OS::memset(buffer,0,sizeof(buffer));
-
-        ssize_t n = stream.recv(buffer,sizeof(buffer)-1);
-
-        if(n>0)
-        {
-            std::cout<<"echo:"<<buffer;
-        }
-        else
-        {
-            break;
-        }
+        std::cerr<<"register acceptor handler failed"<<std::endl;
+        return 1;
     }
-    stream.close();
+
+    std::cout <<"reactor event loop started"<<std::endl;
+
+    ACE_Reactor::instance()->run_reactor_event_loop();
+
     return 0;
 }
