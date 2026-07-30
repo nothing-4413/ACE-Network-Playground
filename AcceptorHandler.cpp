@@ -54,6 +54,14 @@ int AcceptorHandler::handle_input(ACE_HANDLE handle)
     }
     manager_.add(client_handler);
 
+    std::string welcome="[server] welcome,you are client #"+std::to_string(client_id)+"\n";
+
+    client_handler->send_message(welcome);
+
+    std::string notice="[server] client #"+std::to_string(client_id)+"joined,online clients:"+std::to_string(manager_.count())+"\n";
+
+    manager_.broadcast(client_handler,notice);
+
     std::cout<<"online clients:"<<manager_.cout()<<std::endl;
     
     return 0;

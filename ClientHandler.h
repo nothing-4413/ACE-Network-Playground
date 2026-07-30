@@ -22,6 +22,8 @@ public:
     int handle_close(ACE_HANDLE handle, ACE_Reactor_Mask close_mask) override;
 
     int id() const;
+    
+    bool send_messager(const std::string& message);
 
 private:
     ACE_SOCK_Stream stream_;

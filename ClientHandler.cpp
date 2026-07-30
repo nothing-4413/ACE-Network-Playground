@@ -4,6 +4,7 @@
 #include <ace/OS_NS_string.h>
 
 #include <iostream>
+#include <sstream>
 
 namespace
 {
@@ -22,6 +23,11 @@ int ClientHandler::id()const
     return id_;
 }
 
+bool ClientHandler::send_message(const std::string& message)
+{
+    return stream_.send_n(message.data(),message.size())==static_cast<ssize_t>(message.size());
+}
+
 int ClientHandler::handle_input(ACE_HANDLE handle)
 {
     char buffer[BUFFER_SIZE];
@@ -31,12 +37,17 @@ int ClientHandler::handle_input(ACE_HANDLE handle)
     
     if(n>0)
     {
+        std::string text(buffer,static_cast<std::size_t>(n));
+
         std::cout << "client #" << id_ << " says: " << buffer << std::endl;
-        if(stream_.send_n(buffer,n)!=n)
-        {
-            std::cerr<<"send failed for client #"<< id_<< std::endl;
-            return -1;
-        }
+        
+        std::ostringstream out;
+        out<<"client #"<<id_<<:<<text;
+
+        manager_.broadcast(this,out.str());
+
+        send_message("[server] message delivered\n");
+
         return 0;
     }
     if(n==0)
@@ -54,7 +65,12 @@ int ClientHandler::handle_close(ACE_HANDLE handle,ACE_Reactor_Mask close_mask)
 {
     std::cout<<"closing client #"<<id_<<std::endl;
 
+    std::ostringstream out;
+    out<<"[server] client #"<<id_<<"left,online clients:"<<message_.count()-1<<"\n";
+
     manager_.remove(this);
+    
+    manager_.broadcast(this,out.str());
     
     stream_.close()
 

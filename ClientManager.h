@@ -2,6 +2,7 @@
 #define CLIENT_MANAGER_H
 
 #include <set>
+#include <string>
 
 class ClientHandler;
 
@@ -11,6 +12,8 @@ class ClientManger
         void add(ClientHandler* client);
         void remove(ClientHandler* client);
 
+        void broadcast(ClientHandler* sender,const std::string& message);
+        
         int count()const;
     private:
         std::set<ClientHandler*> clients_;

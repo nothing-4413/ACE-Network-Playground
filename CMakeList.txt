@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(module_04_connection_manager LANGUAGES CXX)
+project(module_05_broadcast_chat LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
